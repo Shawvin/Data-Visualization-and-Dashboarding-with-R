@@ -3,7 +3,7 @@ title: "More ggplot Figures Peer Review"
 output: html_document
 ---
 
-# PUT YOUR NAME HERE
+# WANG XIAOYUAN
 
 ## Problem 1
 
@@ -28,9 +28,10 @@ dat1<-tibble(var1,var2,var3)
 
 ```{r problem_1,echo=FALSE,message=FALSE}
 
-####Make sure you install any necessary libraries
-
-####PUT YOUR CODE HERE
+dat1%>% ggplot(aes(x=var1, y=var2)) +
+  geom_point() +
+  geom_smooth() +
+  labs(x="Variable1", y="Variable2")
 ```
 
 ## Problem 2
@@ -53,9 +54,20 @@ dat2<-tibble(var1,var2,var3)
 
 
 ```{r solution_p2,echo=FALSE,message=FALSE}
+library(GGally)
 
-####Make sure you load any necessary libraries
-####PUT YOUR CODE HERE
+my_scatter<-function(data,mapping){
+  ggplot(data=data,mapping=mapping)+
+    geom_jitter(color="orange")
+}
+
+my_density<-function(data,mapping){
+   ggplot(data=data,mapping=mapping)+
+   geom_density(fill="blue")
+}
+
+dat2 %>% ggpairs(lower=list(continuous=my_scatter),
+        diag=list(continuous=my_density))
 
 ```
 
@@ -78,10 +90,11 @@ dat3<-tibble(var1,var2,var3)
 ```
 
 ```{r problem3,echo=FALSE}
-
-####Make sure you load any necessary libraries
-
-####PUT YOUR CODE HERE
+library(ggcorrplot)
+ggcorrplot(cor(dat3),
+           title="Correlations",
+           type="lower",
+           outline.color = "black")
 ```
 
 ## Problem 4
@@ -101,10 +114,11 @@ dat4<-tibble(names,var1)
 
 ```{r problem_4,echo=FALSE}
 
-
-####Make sure you load any necessary libraries
-
-####PUT YOUR CODE HERE
+dat4 %>% ggplot(aes(x=var1, y=reorder(names,var1))) + geom_point() +
+  theme(panel.grid.major.x=element_blank(),
+        panel.grid.minor.x=element_blank(),
+        panel.grid.major.y=element_line(linetype="dashed",color="red"))+
+  labs(x="Variable 1",y="")
 
 ```
 
@@ -125,10 +139,9 @@ dat5<-tibble(names,var1)
 
 ```{r problem_5,echo=FALSE}
 
-
-####Make sure you load any necessary libraries
-
-####PUT YOUR CODE HERE
+dat5 %>% ggplot(aes(x=reorder(names,var1),y=var1)) + geom_point(color="dark green") +
+  geom_segment(x=names,xend=names,y=0,yend=var1, color="dark green") + labs(x="", y="Variable 1") +
+  theme(axis.text.x=element_text(angle=90))
 
 ```
 
@@ -152,10 +165,8 @@ books_checked_out<-bind_rows(fiction,biography,mystery)
 
 ```{r problem_6,echo=FALSE}
 
+books_checked_out %>% ggplot(aes(x=Time, y=Total, fill=Genre)) + geom_area() + labs(title="Books Checked Out")
 
-####Make sure you load any necessary libraries
-
-####PUT YOUR CODE HERE
 
 ```
 
@@ -174,11 +185,14 @@ books_checked_out2 <- books_checked_out %>%
 ```
    
 ```{r,problem_7,echo=FALSE,message=FALSE}   
+library(ggalt)
 
+books_checked_out2 %>% ggplot(aes(x=Time1, xend=Time5, y=reorder(Genre,Time1))) + geom_dumbbell(colour_x="red",
+    colour_xend="purple",
+    size_x=3,
+    size_xend=3) +
+  labs(x="", y="Genre")
 
-####Make sure you load any necessary libraries
-
-####PUT YOUR CODE HERE
 
 ```
 
@@ -202,9 +216,7 @@ library(RColorBrewer)
 
 my_color<-brewer.pal(5,"Spectral")
 
-####Make sure you load any necessary libraries
-
-####PUT YOUR CODE HERE
+pie(pie_dat, col=my_color)
 
 ```
 
