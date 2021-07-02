@@ -1,0 +1,94 @@
+---
+title: "Week 3 Peer Review"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+######DO NOT MODIFY. This will load required packages and data.
+
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+
+cces <- drop_na(read_csv(url("https://www.dropbox.com/s/ahmt12y39unicd2/cces_sample_coursera.csv?raw=1")))
+
+cel <- drop_na(read_csv(url("https://www.dropbox.com/s/4ebgnkdhhxo5rac/cel_volden_wiseman%20_coursera.csv?raw=1")))
+
+```
+
+Following the directions on the Coursera assignment page, you will make four original visualizations. Note that the data for the CCES and CEL data are imported in code in the R Markdown file.
+
+### Put your name here: WANG XIAOYUAN
+
+## Exercise 1
+
+Explain what you are visualizing here: the scatter plot of vote percentage won versus the seniority of MC for congress 115, I hypothesize that these two variables are positively correlated. I also use female variable to color the point and dem variable for facetting.
+Put your figure here:
+
+```{r exercise1,echo=FALSE}
+cel$female<-recode(cel$female, '0'='male', '1'='female')
+cel$dem<-recode(cel$dem, '0'='Republic', '1'='Democratic')
+
+cel %>% filter(congress==115) %>% ggplot(aes(x=seniority, y=votepct, color=female)) +
+  geom_point() +  
+  geom_smooth(method="lm", se=FALSE) +
+  facet_grid(~dem) +
+  guides(col=guide_legend("Gender"))
+  
+```
+
+## Exercise 2
+
+Explain what you are visualizing here: The boxplot of vote percentage won for each party in congress 115
+
+Put your figure here:
+
+```{r exercise2,echo=FALSE}
+
+cel$dem<-recode(cel$dem, '0'='Republic', '1'='Democratic')
+
+cel %>% filter(congress==115) %>% ggplot(aes(x=dem, y=votepct, color=dem)) +
+  geom_boxplot() + 
+  scale_color_manual(values=c("blue","red"), name="Party") +
+  labs(x="Party", y="vote percentage won")
+  
+```
+
+## Exercise 3
+
+Explain what you are visualizing here: The number of male and female MC for each party for congress 115
+
+Put your figure here:
+
+```{r exercise3,echo=FALSE}
+library(ggthemes)
+cel$female<-recode(cel$female, '0'='male', '1'='female')
+cel$dem<-recode(cel$dem, '0'='Republic', '1'='Democratic')
+
+cel %>% filter(congress==115) %>% group_by(dem, female) %>% summarise(num=n()) %>%
+  ggplot(aes(x=dem, y=num, fill=female, label=num)) +
+  geom_bar(stat="identity") +
+  theme_wsj() +
+  theme(legend.title =element_blank()) +
+  labs(x="Party", y="number of MC", title="Number of MC by gender for Congress 115") +
+  geom_text(position = position_stack(vjust = 0.5))
+
+```
+
+## Exercise 4
+
+Explain what you are visualizing here: The number of MC from each party for all the congress, the x axis will be congress and y will be the number of MC from each party
+
+Put your figure here:
+
+```{r exercise4,echo=FALSE}
+cel$dem<-recode(cel$dem, '0'='Republic', '1'='Democratic')
+
+cel %>% group_by(congress, dem) %>% summarise(num=n()) %>%
+  ggplot(aes(x=congress, y=num, color=dem)) +
+  geom_line(size=1) +
+  scale_color_manual(values=c("blue","red"), guide=FALSE) +
+  labs(y="MC number", title="Number of MC from each party for all the congress") 
+
+
+```
