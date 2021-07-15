@@ -1,0 +1,13 @@
+name: peer3
+title: peer3
+username:
+account: shawvin
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4374518
+bundleId: 4810626
+url: https://shawvin.shinyapps.io/peer3/
+when: 1626082503.5428
+asMultiple: TRUE
+asStatic: FALSE
+ignoredFiles: multiple-pages.Rmd|simple-shiny-example.Rmd|tabsets.Rmd

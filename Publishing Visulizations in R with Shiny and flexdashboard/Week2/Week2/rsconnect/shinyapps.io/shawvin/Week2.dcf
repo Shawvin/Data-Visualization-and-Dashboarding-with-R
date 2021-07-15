@@ -1,0 +1,12 @@
+name: Week2
+title: Week2
+username:
+account: shawvin
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4369607
+bundleId: 4803960
+url: https://shawvin.shinyapps.io/Week2/
+when: 1625847949.47207
+asMultiple: FALSE
+asStatic: FALSE
