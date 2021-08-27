@@ -1,0 +1,95 @@
+---
+title: "Data Review"
+author: "WANG XIAOYUAN"
+date: "25/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+#####Make sure you load any required packages.
+
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Import Your Data
+
+In the following code hunk, import your data.
+
+```{r data_import}
+
+data<-read.csv("../athlete_events.csv") 
+
+```
+
+## Part 1
+
+For my first figure, I will user line plot to show the temporal change of sport events number for each Olympic Games, the x axis will be year and y axis will be number of sport events. There will be two lines, one for Summer Olympic Games and the other for Winter.
+
+```{r data_1}
+fig_dat1<-data %>% group_by(Year,Season) %>% summarise(event_count=n_distinct(Event))
+
+####make sure you call the data so it will display in your report
+fig_dat1
+
+fig_dat1 %>% ggplot(aes(x=Year,y=event_count,color=Season)) + geom_line() +geom_point()
+```
+
+## Part 2
+
+For my first figure, I will user bar chart to show the top3 country in gold leader board with the number of gold medals. The x axis will be year and y axis will be the country with most gold medal. 
+
+```{r data_2}
+fig_dat2<-data %>% filter(Medal=='Gold') %>% group_by(Year,Season, NOC) %>% summarise(Gold_Medal_count=n_distinct(Event)) %>% top_n(1, Gold_Medal_count) %>% arrange(desc(Gold_Medal_count))
+
+fig_dat2
+
+fig_dat2 %>% ggplot(aes(x=factor(Year), y=Gold_Medal_count, fill=NOC)) + 
+  geom_bar(stat='identity',position =   position_dodge()) + 
+  geom_text(aes(x=factor(Year), y=Gold_Medal_count/2,label=NOC),size=2, position =position_dodge(width=1)) +
+  geom_text(aes(x=factor(Year), y=Gold_Medal_count*1.05,label=Gold_Medal_count),size=2, position =position_dodge(width=1)) +
+  coord_flip() +
+  facet_grid(.~Season, scale="free") +
+  labs(x="Year",y="Gold Medals")
+```
+
+
+## Part 3
+
+For my first figure, I will user scatter plot chart to show the number of athletes and number of gold medals for each SUmmer Olympic Games
+```{r data_3}
+sub_data1<-data %>% filter(Medal=='Gold') %>% group_by(Year,Season, NOC) %>% summarise(Gold_Medal_count=n_distinct(Event)) 
+
+sub_data2<-data %>% group_by(Year,Season, NOC) %>% summarise(athletes_count=n_distinct(Name))
+
+fig_dat3<-merge(sub_data2,sub_data1, by=c("Year","Season","NOC")) %>% filter(Season=="Summer")
+
+fig_dat3
+
+fig_dat3 %>% ggplot(aes(x=athletes_count, y=Gold_Medal_count)) + 
+  geom_point() +
+  labs(x="Number of athletes", y="Number of gold medal") + 
+  facet_wrap(Year~.)
+```
+
+
+```{r data_3}
+library(gganimate)
+
+sub_data1<-data %>% filter(Medal=='Gold') %>% group_by(Year,Season, NOC) %>% summarise(Gold_Medal_count=n_distinct(Event)) 
+
+sub_data2<-data %>% group_by(Year,Season, NOC) %>% summarise(athletes_count=n_distinct(Name))
+
+fig_dat3<-merge(sub_data2,sub_data1, by=c("Year","Season","NOC"))
+
+g<-fig_dat3 %>% ggplot(aes(x=athletes_count, y=Gold_Medal_count, color=NOC)) + 
+  geom_point(alpha = 0.7) +
+  facet_wrap(~Season) +
+  theme(legend.position = 'none') +
+  labs(title = 'Year: {frame_time}',x="Number of athletes", y="Number of gold medal") + 
+  transition_time(Year) 
+
+animate(g, 120, 4)
+  
+```
