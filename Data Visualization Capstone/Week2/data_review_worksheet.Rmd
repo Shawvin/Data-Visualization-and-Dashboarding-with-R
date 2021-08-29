@@ -57,7 +57,7 @@ fig_dat2 %>% ggplot(aes(x=factor(Year), y=Gold_Medal_count, fill=NOC)) +
 
 ## Part 3
 
-For my first figure, I will user scatter plot chart to show the number of athletes and number of gold medals for each SUmmer Olympic Games
+For my first figure, I will user scatter plot chart to show the number of athletes and number of gold medals for each Summer Olympic Games
 ```{r data_3}
 sub_data1<-data %>% filter(Medal=='Gold') %>% group_by(Year,Season, NOC) %>% summarise(Gold_Medal_count=n_distinct(Event)) 
 

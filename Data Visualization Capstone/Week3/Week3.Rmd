@@ -15,35 +15,45 @@ library(plotly)
 library(treemapify)
 library(gganimate)
 data<-read.csv("../athlete_events.csv") 
+region<-read.csv("../noc_regions.csv")
 ```
 
-Sport Events {data-orientation=columns}
+Sport Events {data-icon="fa-globe"}
 ===================================== 
 
-Column {data-width=300}
+Column {data-width=400}
 -------
 
-### Olympic Games Sport Events
+### Olympic Games Sport Events{data-height=400}
 
-![](Olympic_Sports_pictorial.jpeg)
+![](Olympic_Sports_pictorial.jpeg) 
 
-### Olympic Games Sport Events
+### Olympic Games Sport Events{data-height=600}
     
 ```{r}
 # show the change of sport event
-fig_dat1<-data %>% filter(Year!=1906) %>% group_by(Year,Season) %>% summarise(Sport_events=n_distinct(Event))
+fig_dat1<-data %>% filter(Year!=1906) %>% 
+  group_by(Year,Season) %>% 
+  summarise(sports=n_distinct(Sport),Sport_events=n_distinct(Event))%>%
+  mutate(Sport=Season, Event=Season)
 
-fig1<-fig_dat1 %>% ggplot(aes(x=Year,y=Sport_events,color=Season)) + 
-  geom_line() +
-  geom_point() +
-  labs(x="Year of Olympic Games", y="Number of Sport events") +
-  scale_x_continuous(breaks = seq(1890 , 2016, 12))
+fig_dat1 %>% ggplot(aes(x=Year,y=Sport_events)) + 
+  geom_line(aes(color=Event)) +
+  geom_point(aes(color=Event)) +
+  geom_bar(aes(x=Year, y=sports*1.5, fill=Sport),stat = "identity") +
+  scale_fill_manual(values=c("red","blue")) +
+  scale_colour_manual(values = c("red","blue")) +
+  facet_grid(Sport~., scale="free_y") +
+  labs(x="Year of Olympic Games") +
+  scale_x_continuous(breaks = seq(1890 , 2016, 12)) +
+  scale_y_continuous(name = "Number of Event",
+                     sec.axis = sec_axis(~./1.5, name = "Number of Sport"))
+ 
   
-ggplotly(fig1)
 ```
 
 
-Column {.tabset data-width=700}
+Column {.tabset data-width=600}
 -------       
 ### 2016 Rio Olympic Summer Games
 
@@ -54,10 +64,10 @@ fig_dat2 %>% ggplot(aes(area=Sport_events, fill=Sport, label=paste(Sport, Sport_
   geom_treemap() +
   geom_treemap_text(colour = "white",
                     place = "centre",
-                    size = 10,
-                    grow = TRUE) +
+                    size = 12,
+                    reflow = TRUE) +
   theme(legend.position = "none") +
-  labs(title="Events under 34 sports for 2016 Rio Summer Olympic Games")
+  labs(title="Events number under 34 sports for 2016 Rio Summer Olympic Games")
 
 ```
 
@@ -72,11 +82,11 @@ fig_dat3 %>% ggplot(aes(area=Sport_events, fill=Sport, label=paste(Sport, Sport_
                     place = "centre",
                     size = 12) +
   theme(legend.position = "none") +
-  labs(title="Events under 15 sports for 2014 Sochi Winter Olympic Games")
+  labs(title="Events number under 15 sports for 2014 Sochi Winter Olympic Games")
 
 ```
 
-Athletes {data-orientation=columns}
+Athletes {data-icon="fa-swimmer"}
 ===================================== 
 
 Column {.tabset data-width=500}
@@ -86,9 +96,12 @@ Column {.tabset data-width=500}
     
 ```{r}
 # show the number of athlete
-fig_dat4<-data %>% filter(Season=="Summer" & Year!=1906) %>% group_by(Year,Sex) %>% summarise(Athletes=n_distinct(Name))
+fig_dat4<-data %>% 
+  filter(Season=="Summer" & Year!=1906) %>% 
+  group_by(Year,Sex) %>% 
+  summarise(Athletes=n_distinct(ID))
 
-fig4<-fig_dat4 %>% ggplot(aes(x=Year,y=Athletes, group=Sex, fill=Sex)) + 
+fig4<-fig_dat4 %>% ggplot(aes(x=Year,y=Athletes, fill=Sex)) + 
   geom_bar(stat="identity",position = "stack") +
   labs(x="Year of Olympic Games", y="Number of Athletes") +
   scale_x_continuous(breaks = seq(1896 , 2016, 20))
@@ -99,23 +112,56 @@ ggplotly(fig4)
     
 ```{r}
 # show the number of athlete
-fig_dat4<-data %>% filter(Season=="Winter") %>% group_by(Year,Sex) %>% summarise(Athletes=n_distinct(Name))
+fig_dat5<-data %>% 
+  filter(Season=="Winter") %>% 
+  group_by(Year,Sex) %>% 
+  summarise(Athletes=n_distinct(ID))
 
-fig4<-fig_dat4 %>% ggplot(aes(x=Year,y=Athletes, group=Sex, fill=Sex)) + 
+fig5<-fig_dat5 %>% ggplot(aes(x=Year,y=Athletes, group=Sex, fill=Sex)) + 
   geom_bar(stat="identity",position = "stack") +
   labs(x="Year of Olympic Games", y="Number of Athletes") +
   scale_x_continuous(breaks = seq(1896 , 2016, 20))
 
-ggplotly(fig4)
+ggplotly(fig5)
 ```
 
 
-Column {data-width=700}
+Column {.tabset data-width=500}
 -------       
-### 2016 Rio Olympic Summer Games
+### Summer Olympic Games
+
+```{r}
+sub_data1<-data %>% filter(Medal=='Gold' & Year!=1906) %>% 
+  group_by(Year,Season, NOC) %>% 
+  summarise(Gold_Medal_count=n_distinct(Event)) 
+
+sub_data2<-data %>% filter(Year!=1906) %>% 
+  group_by(Year,Season, NOC) %>% 
+  summarise(athletes_count=n_distinct(ID))
+
+fig_dat6<-merge(sub_data2,sub_data1, by=c("Year","Season","NOC"))
 
 
-Medals {data-orientation=columns}
+fig_dat6  %>% filter(Season=="Summer") %>% 
+  ggplot(aes(x=athletes_count, y=Gold_Medal_count)) + 
+  geom_point() +
+  labs(x="Number of athletes", y="Number of gold medal") + 
+  facet_wrap(Year~.)
+```
+
+### Winter Olympic Games
+
+```{r}
+fig_dat6  %>% filter(Season=="Winter") %>% 
+  ggplot(aes(x=athletes_count, y=Gold_Medal_count)) + 
+  geom_point() +
+  labs(x="Number of athletes", y="Number of gold medal") + 
+  facet_wrap(Year~.)
+```
+
+
+
+Medals {data-icon="fa-medal"}
 ===================================== 
 
 Column {.tabset data-width=500}
@@ -128,9 +174,10 @@ fig_dat6<-data %>% filter(Medal=='Gold') %>%
   filter(Season=="Summer" & Year!=1906) %>%
   group_by(Year,NOC) %>% 
   summarise(Gold_Medal_count=n_distinct(Event)) %>% 
-  top_n(1, Gold_Medal_count) %>% arrange(desc(Gold_Medal_count))
+  top_n(1, Gold_Medal_count) %>% arrange(desc(Gold_Medal_count)) %>%
+  merge(region,by="NOC")
 
-fig_dat6 %>% ggplot(aes(x=factor(Year), y=Gold_Medal_count, fill=NOC)) + 
+fig_dat6 %>% ggplot(aes(x=factor(Year), y=Gold_Medal_count, fill=region)) + 
   geom_bar(stat='identity',position =   position_dodge()) + 
   geom_text(aes(x=factor(Year), y=Gold_Medal_count/2,label=NOC),size=2, position =position_dodge(width=1)) +
   geom_text(aes(x=factor(Year), y=Gold_Medal_count*1.05,label=Gold_Medal_count),size=2, position =position_dodge(width=1)) +
@@ -142,13 +189,14 @@ fig_dat6 %>% ggplot(aes(x=factor(Year), y=Gold_Medal_count, fill=NOC)) +
 ### Winter Olympic Games Gold Medal Leader Board
 ```{r}
 # show the country with most gold Medal for each Summer Olympic Games
-fig_dat6<-data %>% filter(Medal=='Gold') %>% 
+fig_dat7<-data %>% filter(Medal=='Gold') %>% 
   filter(Season=="Winter") %>%
   group_by(Year,NOC) %>% 
   summarise(Gold_Medal_count=n_distinct(Event)) %>% 
-  top_n(1, Gold_Medal_count) %>% arrange(desc(Gold_Medal_count))
+  top_n(1, Gold_Medal_count) %>% arrange(desc(Gold_Medal_count)) %>%
+  merge(region,by="NOC")
 
-fig_dat6 %>% ggplot(aes(x=factor(Year), y=Gold_Medal_count, fill=NOC)) + 
+fig_dat7 %>% ggplot(aes(x=factor(Year), y=Gold_Medal_count, fill=region)) + 
   geom_bar(stat='identity',position =   position_dodge()) + 
   geom_text(aes(x=factor(Year), y=Gold_Medal_count/2,label=NOC),size=2, position =position_dodge(width=1)) +
   geom_text(aes(x=factor(Year), y=Gold_Medal_count*1.05,label=Gold_Medal_count),size=2, position =position_dodge(width=1)) +
@@ -160,46 +208,55 @@ fig_dat6 %>% ggplot(aes(x=factor(Year), y=Gold_Medal_count, fill=NOC)) +
 Column {.tabset data-width=500}
 -------
 
-### Correlation between Athletes and Gold medals
-```{r data_3}
-sub_data1<-data %>% filter(Medal=='Gold') %>% 
-  filter(Season=="Summer" & Year!=1906) %>%
-  group_by(Year,NOC) %>% 
-  summarise(Gold_Medal_count=n_distinct(Event))
+### 2016 Rio Olympic Summer Games Medals Leaderboard
+```{r}
+fig_dat8<-data %>% filter(Year==2016 & Season=="Summer" & Medal!="NA") %>% 
+  group_by(NOC,Medal) %>% 
+  summarise(Medal_count=n_distinct(Event)) %>%
+  mutate(total_medal=sum(Medal_count)) %>%
+  spread(Medal, Medal_count) %>% 
+  arrange(desc(Gold),desc(total_medal)) %>%
+  head(10) %>%
+  ungroup() %>%
+  mutate(gold_rank=1:10) %>%
+  gather("Medal","count",-c(NOC,gold_rank,total_medal)) %>%
+  mutate(Medal=factor(Medal, levels=c("Gold","Silver","Bronze"))) %>%
+  merge(region,by="NOC")
 
-sub_data2<-data %>% filter(Season=="Summer" & Year!=1906) %>%
-  group_by(Year, NOC) %>% 
-  summarise(athletes_count=n_distinct(Name))
+fig_dat8 %>% ggplot(aes(x= reorder(region,-gold_rank),y=count, fill=Medal)) +
+  geom_bar(stat = "identity", position = position_stack(reverse = T)) +
+  scale_fill_manual(values=c("#FFCC33","#D7D7D7","#CC6600"))+
+  labs(x="", y="") +
+  coord_flip() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) 
 
-fig_dat7<-merge(sub_data2,sub_data1, by=c("Year","NOC"))
-
-g<-fig_dat7 %>% ggplot(aes(x=athletes_count, y=Gold_Medal_count, color=NOC)) + 
-  geom_point(alpha = 0.7) +
-  theme(legend.position = 'none') +
-  labs(x="Number of athletes", y="Number of gold medal") 
-
-g
   
 ```
 
-### Correlation between Athletes and Gold medals
-```{r data_3}
-sub_data1<-data %>% filter(Medal=='Gold') %>% 
-  filter(Season=="Winter") %>%
-  group_by(Year,NOC) %>% 
-  summarise(Gold_Medal_count=n_distinct(Event))
+### 2014 Sochi Olympic Winter Games Medals Leaderboard
+```{r}
+fig_dat9<-data %>% filter(Year==2014 & Season=="Winter" & Medal!="NA") %>% 
+  group_by(NOC,Medal) %>% 
+  summarise(Medal_count=n_distinct(Event)) %>%
+  mutate(total_medal=sum(Medal_count)) %>%
+  spread(Medal, Medal_count) %>% 
+  arrange(desc(Gold),desc(total_medal)) %>%
+  head(10) %>%
+  ungroup() %>%
+  mutate(gold_rank=1:10) %>%
+  gather("Medal","count",-c(NOC,gold_rank,total_medal)) %>%
+  mutate(Medal=factor(Medal, levels=c("Gold","Silver","Bronze"))) %>%
+  merge(region,by="NOC")
 
-sub_data2<-data %>% filter(Season=="Winter") %>%
-  group_by(Year, NOC) %>% 
-  summarise(athletes_count=n_distinct(Name))
-
-fig_dat7<-merge(sub_data2,sub_data1, by=c("Year","NOC"))
-
-g<-fig_dat7 %>% ggplot(aes(x=athletes_count, y=Gold_Medal_count, color=NOC)) + 
-  geom_point(alpha = 0.7) +
-  theme(legend.position = 'none') +
-  labs(x="Number of athletes", y="Number of gold medal") 
-
-g
+fig_dat9 %>% ggplot(aes(x= reorder(region,-gold_rank),y=count, fill=Medal)) +
+  geom_bar(stat = "identity", position = position_stack(reverse = T)) +
+  scale_fill_manual(values=c("#FFCC33","#D7D7D7","#CC6600"))+
+  labs(x="", y="") +
+  coord_flip() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
   
 ```

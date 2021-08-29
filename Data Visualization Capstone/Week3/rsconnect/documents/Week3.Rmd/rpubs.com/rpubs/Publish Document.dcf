@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/802613/a2379ad0d0c1423bb5763b8128eb4bf7
+bundleId: https://api.rpubs.com/api/v1/document/802613/a2379ad0d0c1423bb5763b8128eb4bf7
+url: http://rpubs.com/Shawvin/802613
+when: 1630111372.56735
+lastSyncTime: 1630111372.56735
